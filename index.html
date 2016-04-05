@@ -100,6 +100,8 @@
 		precision mediump float; 
 		
 		uniform vec3 uLPos; 
+
+		uniform float ufs, ufh, ubs, ubb, ubh, ussb, usbh;
 		
 		varying vec3 vNormal; 
 		varying vec3 vPosW;
@@ -113,13 +115,17 @@
 		 	vec4 ambient = vec4(lColor.rgb * matAmb.rgb, matAmb.a); 
 		
 		 	vec3 vL = normalize(uLPos - vPosW); 
-		 	float teta = max(dot(vL, vNormal), 0.0); 
-			
+		 	float teta = max(dot(vL, vNormal), 0.0);
+		 	float lmn = teta; 
+
 			//Variação na reflexão difusa
-			if(teta > &kd&)
-				teta = 0.93;
-			else
-				teta = 0.2;
+		 	if (lmn >= ufs + ussb)
+		 		teta = ubb;
+		 	else if (lmn <= ufs - ussb)
+		 		teta = ubs;
+		 	else if ((ufs - ussb < lmn) && (lmn < ufs + ussb))
+				teta = ((lmn - (ufs - ussb))/2.0*ussb)*ubb+(((ufs + ussb)-lmn)/2.0*ussb)*ubs;			
+			
 
 		 	vec4 diffuse = vec4(lColor.rgb * matDif.rgb * teta, matDif.a); 
 						
@@ -127,15 +133,18 @@
 		 	vec3 vV = normalize(cameraPosition - vPosW); 
 		 	vec3 vR = normalize(reflect(-vL, vNormal)); 
 		 	float omega = max(dot(vV, vR), 0.0);
+			float rmv = omega;
 			
 			//Variação na reflexão specular
-			if(omega > &ks&)
-				omega = 0.93;
-			else
-				omega = 0.2;
+			if (rmv <= 1.0 - ufs - usbh)
+				omega = 0.0;
+			else if (rmv > 1.0 - ufs + usbh)
+				omega = ubh;
+			else if ((1.0 - ufh - usbh < rmv) && (rmv < 1.0 - ufh + usbh))
+				omega = ((rmv - (1.0 - ufh - usbh))/2.0*usbh)*ubh;
 
-		 	vec4 specular = vec4(lColor.rgb * matSpec.rgb * pow(omega,20.0), matSpec.a); 
-			
+		 	//vec4 specular = vec4(lColor.rgb * matSpec.rgb * pow(omega,20.0), matSpec.a); 
+			vec4 specular = vec4(lColor.rgb * matSpec.rgb * omega, matSpec.a); 
 		 	gl_FragColor = clamp(ambient + diffuse + specular, 0.0, 1.0); 
 			} 	
 	</script>

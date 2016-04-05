@@ -7,9 +7,16 @@ var day 			= 0.0;
 var year			= 0.0;
 var month			= 0.0;
 var clock;
-var effectController;
-var obj;
+var effectController,uniforms,obj;
 var Modelo = "Models/Luigi.obj";
+var fs, fh, bs, bb, bh, ssb, sbh;
+fs = 0.0;
+fh = 0.5;
+bs = 0.6;
+bb = 0.5;
+bh = 0.7;
+ssb = 0.0;
+sbh = 0.5;
 
 function init() {
 
@@ -41,26 +48,77 @@ function init() {
 
 function initGUI() {
 	effectController = {
-
-			difusa: 0.4,
-			specular: 0.8,
+			fs : fs,
+			fh : fh,
+			bs : bs, 
+			bb : bb, 
+			bh : bh, 
+			ssb : ssb, 
+			sbh : sbh,
 			dummy: function () {
 			}
 	};
 
-	var gui = new dat.GUI();
+	var gui = new dat.GUI(); //fs, fh, bs, bb, bh, ssb, sbh
 	var folder = gui.addFolder("Constantes Limites");
-	folder.add(effectController, "difusa", 0.0, 1.0, 0.025).name("difusa").onChange(
+	folder.add(effectController, "fs", 0.0, 1.0, 0.025).name("fs").onChange(
 			function (value) {
-				loadMeshes();
+				changeUniform("fs",value);
 	});
-	folder.add(effectController, "specular", 0.0, 1.0, 0.025).name("specular").onChange(
+	folder.add(effectController, "fh", 0.0, 1.0, 0.025).name("fh").onChange(
 			function (value) {
-				loadMeshes();
+				changeUniform("fh",value);
+	});
+	folder.add(effectController, "bs", 0.0, 1.0, 0.025).name("bs").onChange(
+			function (value) {
+				changeUniform("bs",value);
+	});
+	folder.add(effectController, "bb", 0.0, 1.0, 0.025).name("bb").onChange(
+			function (value) {
+				changeUniform("bb",value);
+	});
+	folder.add(effectController, "bh", 0.0, 1.0, 0.025).name("bh").onChange(
+			function (value) {
+				changeUniform("bh",value);
+	});
+	folder.add(effectController, "ssb", 0.0, 1.0, 0.025).name("ssb").onChange(
+			function (value) {
+				changeUniform("ssb",value);
+	});
+	folder.add(effectController, "sbh", 0.0, 1.0, 0.025).name("sbh").onChange(
+			function (value) {
+				changeUniform("sbh",value);
 	});
 
 	
 };
+
+function changeUniform(arg,value) {
+	switch(arg) {
+	    case "fs":
+	    	uniforms.ufs.value = value;
+	        break;
+	    case "fh":
+	    	uniforms.ufh.value = value;
+	        break;
+	    case "bs":
+	    	uniforms.ubs.value = value;
+	        break;
+	    case "bb":
+	    	uniforms.ubb.value = value;
+	        break;
+	    case "bh":
+	    	uniforms.ubh.value = value;
+	        break;
+	    case "ssb":
+	    	uniforms.ussb.value = value;
+	        break;
+	    case "sbh":
+	    	uniforms.usbh.value = value;
+	        break;
+	} 	
+	//updateUniform();
+}
 
 function loadMeshes() {
 	// Load Mesh
@@ -72,8 +130,14 @@ function render() {
 	var delta = clock.getDelta();
     orbitControls.update(delta);
 
+    matShader.needsUpdate = true;
+
 	renderer.render(scene, camera);
 	requestAnimationFrame(render);
+}
+
+function updateUniform() {
+		loadMeshes();
 }
 
 function buildScene(loadedMesh) { 
@@ -128,13 +192,20 @@ function buildScene(loadedMesh) {
 	
 	uniforms = {
 		uCamPos	: 	{ type: "v3", value:camera.position},
-		uLPos	:	{ type: "v3", value:pointLight.position} 
+		uLPos	:	{ type: "v3", value:pointLight.position},
+		ufs 	: 	{ type: "f", value:fs} , 
+		ufh 	: 	{ type: "f", value:fh} , 
+		ubs 	: 	{ type: "f", value:bs} , 
+		ubb 	: 	{ type: "f", value:bb} , 
+		ubh 	: 	{ type: "f", value:bh} , 
+		ussb 	: 	{ type: "f", value:ssb} , 
+		usbh 	: 	{ type: "f", value:sbh} 
 		};
 	
 	matShader = new THREE.ShaderMaterial( {
 			uniforms: uniforms,
 			vertexShader: document.getElementById( 'phong-vs' ).textContent,
-			fragmentShader: document.getElementById( 'toon-fs' ).textContent.replace("&kd&",effectController.difusa).replace("&ks&",effectController.specular)
+			fragmentShader: document.getElementById( 'toon-fs' ).textContent
 			} );
 	
 	
@@ -149,7 +220,6 @@ function buildScene(loadedMesh) {
 				}
 			}
 		});
-	
 	obj = loadedMesh;
 	scene.add(loadedMesh);
 	render();
