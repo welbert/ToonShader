@@ -149,6 +149,9 @@ function buildScene(loadedMesh) {
 		laplacianShaderPass.uniforms['uPixelSize'].value = new THREE.Vector2(1.0/canvasSize.width, 1.0/canvasSize.height);
 		laplacianShaderPass.renderToScreen = true;
 		composer.addPass(laplacianShaderPass);
+
+		//Non-maximum suppression: Only local maxima should be marked as edges
+
 	}
 
 	render();
@@ -165,6 +168,7 @@ function initGUI() {
 		this.fh		= fh_GUI;
 		this.bh		= bh_GUI;
 		this.sbh	= sbh_GUI;
+		this.composerAtivo = hasComposer;
 		}
 
 	var gui = new dat.GUI();
@@ -199,6 +203,11 @@ function initGUI() {
 	Vm.add(controls, 'sbh', 0.0, 1.0).onChange(function (value) {
 		sbh_GUI  					=
 		matShader.uniforms.sbh.value=  controls.sbh;
+		});
+
+	gui.add(controls,'composerAtivo',hasComposer).onChange(function (value) {
+			hasComposer = value;
+			loadMeshes();
 		});
 
 };
