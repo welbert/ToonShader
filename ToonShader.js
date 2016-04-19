@@ -141,7 +141,7 @@ function buildScene(loadedMesh) {
 		//smoothShaderPass.renderToScreen = true;
 		composer.addPass(smoothShaderPass);
 
-		//Finding gradients: The edges should be marked where the gradients of the image has large magnitudes.
+		// ERRADO TIRAR
 		var laplacianShaderPass = new THREE.ShaderPass(THREE.laplacianShader);
 		var kernel = new THREE.Matrix3;
 		kernel.set(-1.0, -1.0, -1.0, -1.0, 8.0, -1.0, -1.0, -1.0, -1.0);
@@ -149,6 +149,13 @@ function buildScene(loadedMesh) {
 		laplacianShaderPass.uniforms['uPixelSize'].value = new THREE.Vector2(1.0/canvasSize.width, 1.0/canvasSize.height);
 		laplacianShaderPass.renderToScreen = true;
 		composer.addPass(laplacianShaderPass);
+
+		/* Finding gradients: The edges should be marked where the gradients of the image has large magnitudes.
+		http://www.cse.iitd.ernet.in/~pkalra/csl783/canny.pdf
+		http://jsfiddle.net/v72rn4bk/4/
+		var edgeStrenghtPass = new THREE.ShaderPass(THREE.edgeStrenghtShader);
+		edgeStrenghtPass.renderToScreen = true;
+		composer.addPass(edgeStrenghtPass);*/
 
 		//Non-maximum suppression: Only local maxima should be marked as edges
 
