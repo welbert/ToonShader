@@ -132,8 +132,8 @@ function buildScene(loadedMesh) {
 
 		//Conversion to gray-scale
 		var grayShaderPass = new THREE.ShaderPass(THREE.grayShader);
-		composer.addPass(grayShaderPass);
 		//grayShaderPass.renderToScreen = true;
+		composer.addPass(grayShaderPass);
 
 		//Smoothing: Blurring of the image to remove noise.
 		var smoothShaderPass = new THREE.ShaderPass(THREE.smoothShader);
@@ -141,21 +141,15 @@ function buildScene(loadedMesh) {
 		//smoothShaderPass.renderToScreen = true;
 		composer.addPass(smoothShaderPass);
 
-		// ERRADO TIRAR
-		var laplacianShaderPass = new THREE.ShaderPass(THREE.laplacianShader);
+		// Finding gradients: The edges should be marked where the gradients of the image has large magnitudes.
+		var sobelShaderPass = new THREE.ShaderPass(THREE.kernel3x3Shader);
 		var kernel = new THREE.Matrix3;
 		kernel.set(-1.0, -1.0, -1.0, -1.0, 8.0, -1.0, -1.0, -1.0, -1.0);
-		laplacianShaderPass.uniforms['uKernel'].value = kernel;
-		laplacianShaderPass.uniforms['uPixelSize'].value = new THREE.Vector2(1.0/canvasSize.width, 1.0/canvasSize.height);
-		laplacianShaderPass.renderToScreen = true;
-		composer.addPass(laplacianShaderPass);
-
-		/* Finding gradients: The edges should be marked where the gradients of the image has large magnitudes.
-		http://www.cse.iitd.ernet.in/~pkalra/csl783/canny.pdf
-		http://jsfiddle.net/v72rn4bk/4/
-		var edgeStrenghtPass = new THREE.ShaderPass(THREE.edgeStrenghtShader);
-		edgeStrenghtPass.renderToScreen = true;
-		composer.addPass(edgeStrenghtPass);*/
+		sobelShaderPass.uniforms['uKernel'].value = kernel;
+		sobelShaderPass.uniforms['uPixelSize'].value = new THREE.Vector2(1.0/canvasSize.width, 1.0/canvasSize.height);
+		sobelShaderPass.uniforms['uShift'].value = 0.15;
+		sobelShaderPass.renderToScreen = true;
+		composer.addPass(sobelShaderPass);
 
 		//Non-maximum suppression: Only local maxima should be marked as edges
 
